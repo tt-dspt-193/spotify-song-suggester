@@ -1,0 +1,51 @@
+body {
+    background: rgba(211, 211, 211, 0.5) !important;
+}
+
+.navbar-brand {
+    text-shadow: 2px 2px darkgrey;
+    font-weight: bold;
+}
+
+.dropdown-menu {
+    min-width: 0 !important;
+}
+
+.dropdown-item {
+    padding: 4px 10px !important;
+}
+
+.card-body {
+    box-shadow: 3px 3px 7px darkgrey;
+    border-radius: 3px;
+}
+
+.balance-card1, .balance-card2 {
+    background-color: rgba(134, 172, 179, 0.75);
+}
+
+#morning-message {
+    text-shadow: 1px 2px darkgrey;
+}
+
+.links li {
+    display: inline;
+    padding: 0.75em;
+}
+
+#disclaimer h4 {
+    font-size: 1.3em;
+}
+
+#disclaimer p {
+    font-size: 0.85em;
+}
+
+
+/* media queries */
+@media (max-width: 768px) {
+    #morning-message {
+        font-size: 2em;
+    }
+
+}
