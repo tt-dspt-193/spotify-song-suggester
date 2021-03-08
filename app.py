@@ -2,6 +2,8 @@
 
 from flask import Flask, url_for, render_template, request, redirect, session, jsonify, Response
 from flask_sqlalchemy import SQLAlchemy
+import pandas as pd
+import csv
 
 
 app = Flask(__name__)
@@ -71,7 +73,7 @@ class Songs(db.Model):
     popularity = db.Column(db.Integer())
     favorite = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey(
-       "users.id"), nullable=False)
+       "users.id"), nullable=True)
    
 
     def __init__(self, acousticness, artists, danceability, name, popularity, favorite):
@@ -85,7 +87,7 @@ class Songs(db.Model):
     def json(self):
         return {'id': self.id, 'acousticness': self.acousticness,
                 'artists': self.artists, 'danceability': self.danceability,
-                'name': self.name, 'popularity': self.popularity, 'favorite': self.favorite, 'user_id': self.user_id}
+                'name': self.name, 'popularity': self.popularity, 'favorite': self.favorite}
         # this method we are defining will convert our output to json
 
     def get_all_songs():
@@ -96,14 +98,17 @@ class Songs(db.Model):
         '''function to get song using the id of the song as parameter'''
         return [Songs.json(Songs.query.filter_by(id=_id).first())]
 
-    def add_song(acousticness, artists, danceability, name, popularity, favorite, user_id):
+    def add_song(acousticness, artists, danceability, name, popularity, favorite, user_id=None):
         '''function to add song to database using acousticness, artists, danceability, name, popularity
         as parameters'''
         # creating an instance of our Song constructor
         new_song = Songs(acousticness=acousticness, artists=artists, danceability=danceability, name=name, popularity=popularity, favorite=favorite)
-        user = Users.query.filter_by(id=user_id).first()
-        user.song.append(new_song)
-        db.session.add(new_song)  # add new song to database session
+        if user_id==None:
+            db.session.add(new_song)
+        else:
+            user = Users.query.filter_by(id=user_id).first()
+            user.song.append(new_song)
+            db.session.add(new_song)  # add new song to database session
         # db.session.commit()  # commit changes to session
 
     def update_song(_id, acousticness, artists, danceability, name, popularity, favorite):
@@ -313,6 +318,56 @@ def hello():
 #     u.song.append(s)
 #     db.session.commit()
 
+@app.cli.command()
+def addsongs():
+    db.drop_all()
+    db.create_all()
+    with open('/Users/bryt/Downloads/archive/data.csv') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        next(csv_reader)
+        count = 0
+        for row in csv_reader:
+            # if count == 8:
+            #     print("Count: ", count)
+            #     print("Break")
+            #     count += 1
+            #     break
+            # else:
+            a = row[0]
+            r = row[1]
+            d = row[2]
+            n = row[12]
+            p = row[13]
+            f = False
+
+                # print("This is the ac: ", a)
+                # print("This is the artist: ",r)
+                # print("This is the danceability: ",d)
+                # print("This is the name: ",n)
+                # print("This is the pro: ",p)
+
+
+            Songs.add_song(a,r,d,n,p,f)
+            db.session.commit()
+            
+
+                # print("Count: ", count)
+                # count += 1
+
+        # print("Done adding songs")
+
+
+
+    # df=pd.read_csv('/Users/bryt/Downloads/archive/data.csv')
+    # for row in df: 
+    #     print(row)
+        # print('artists : ', artists)
+        # print('danceability : ', danceability)
+        # print('name: ' , name)
+        # print('popularity : ', popularity)
+        # print('favorite : ' ,favorite)
+
+
 if __name__ == '__main__':
     app.debug = True
     # db.create_all()
@@ -328,6 +383,3 @@ if __name__ == '__main__':
 #     db.session.add(new_user)
 #     db.session.commit()
 
-
-if __name__ == '__main__':
-    init_db()
